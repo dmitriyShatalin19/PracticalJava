@@ -5,17 +5,20 @@ public class WordPuzzle {
     private static char[][] grid;
     private static int size;
     private static final Random random = new Random();
+    private static final int MAX_SIZE = 50;
 
     public static void main(String[] args) {
-        while (true) {
-            size = (int) Math.ceil(Math.sqrt(words.stream().mapToInt(String::length).sum() * 1.5));
+        for (size = (int) Math.ceil(Math.sqrt(words.stream().mapToInt(String::length).sum() * 1.5)); size <= MAX_SIZE; size++) {
             grid = new char[size][size];
             for (char[] row : grid) Arrays.fill(row, ' ');
 
-            if (attemptToPlaceWords()) break;
+            if (attemptToPlaceWords()) {
+                fillEmptyCells();
+                printGrid();
+                return;
+            }
         }
-        fillEmptyCells();
-        printGrid();
+        System.out.println("Не уалось разместить все слова в допустимой матрице.");
     }
 
     private static boolean attemptToPlaceWords() {
@@ -33,21 +36,39 @@ public class WordPuzzle {
             int dCol = (dir == 0) ? 1 : (dir == 2 ? 1 : 0);
 
             if (row + dRow * (word.length() - 1) >= size || col + dCol * (word.length() - 1) >= size) continue;
-            if (IntStream.range(0, word.length()).anyMatch(i -> grid[row + i * dRow][col + i * dCol] != ' ')) continue;
+            boolean canPlace = true;
+            for (int i = 0; i < word.length(); i++) {
+                if (grid[row + i * dRow][col + i * dCol] != ' ') {
+                    canPlace = false;
+                    break;
+                }
+            }
+            if (!canPlace) continue;
 
-            IntStream.range(0, word.length()).forEach(i -> grid[row + i * dRow][col + i * dCol] = word.charAt(i));
+            for (int i = 0; i < word.length(); i++) {
+                grid[row + i * dRow][col + i * dCol] = word.charAt(i);
+            }
             return true;
         }
         return false;
     }
-
+    
     private static void fillEmptyCells() {
-        for (char[] row : grid)
-            Arrays.setAll(row, i -> row[i] == ' ' ? (char) ('А' + random.nextInt(32)) : row[i]);
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (grid[i][j] == ' ') {
+                    grid[i][j] = (char) ('А' + random.nextInt(32));
+                }
+            }
+        }
     }
-
     private static void printGrid() {
-        Arrays.stream(grid).map(String::new).forEach(System.out::println);
+        for (char[] row : grid) {
+            for (char c : row) {
+                System.out.print(c + " ");
+            }
+            System.out.println();
+        }
     }
 }
 
