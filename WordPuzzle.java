@@ -1,65 +1,53 @@
 import java.util.*;
 
 public class WordPuzzle {
-    private static List<String> words = Arrays.asList("СЛОВО", "ДУМАЙ", "МОЗГ", "РАЗУМ", "ПАМЯТЬ");
+    private static List<String> words = Arrays.asList("СЛОВО", "ДУМАЙ", "МОЗГ", "ПАМЯТЬ", "РАЗУМ", "какоетослово", "огромноеслово", "ямал", "анды");
     private static char[][] grid;
     private static int size;
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     public static void main(String[] args) {
-        size = calculateSize(words);
-        grid = new char[size][size];
-        for (char[] row : grid) Arrays.fill(row, ' ');
+        while (true) {
+            size = (int) Math.ceil(Math.sqrt(words.stream().mapToInt(String::length).sum() * 1.5));
+            grid = new char[size][size];
+            for (char[] row : grid) Arrays.fill(row, ' ');
 
-        placeWords(words);
+            if (attemptToPlaceWords()) break;
+        }
         fillEmptyCells();
         printGrid();
     }
 
-    private static int calculateSize(List<String> words) {
-        int totalLength = words.stream().mapToInt(String::length).sum();
-        return (int) Math.ceil(Math.sqrt(totalLength * 1.5));
-    }
-    private static void placeWords(List<String> words) {
+    private static boolean attemptToPlaceWords() {
         for (String word : words) {
-            boolean placed = false;
-            while (!placed) {
-                int row = random.nextInt(size);
-                int col = random.nextInt(size);
-                int direction = random.nextInt(3);
-                placed = tryPlaceWord(word, row, col, direction);
-            }
-        }
-    }
-    private static boolean tryPlaceWord(String word, int row, int col, int direction) {
-        int len = word.length();
-        int dRow = (direction == 1) ? 1 : (direction == 2 ? 1 : 0);
-        int dCol = (direction == 0) ? 1 : (direction == 2 ? 1 : 0);
-
-        if (row + dRow * (len - 1) >= size || col + dCol * (len - 1) >= size) return false;
-        for (int i = 0; i < len; i++) {
-            if (grid[row + i * dRow][col + i * dCol] != ' ') return false;
-        }
-        for (int i = 0; i < len; i++) {
-            grid[row + i * dRow][col + i * dCol] = word.charAt(i);
+            if (!placeWord(word)) return false;
         }
         return true;
     }
-    private static void fillEmptyCells() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (grid[i][j] == ' ') {
-                    grid[i][j] = (char) ('А' + random.nextInt(32));
-                }
-            }
+
+    private static boolean placeWord(String word) {
+        int attempts = 100;
+        while (attempts-- > 0) {
+            int row = random.nextInt(size), col = random.nextInt(size), dir = random.nextInt(3);
+            int dRow = (dir == 1) ? 1 : (dir == 2 ? 1 : 0);
+            int dCol = (dir == 0) ? 1 : (dir == 2 ? 1 : 0);
+
+            if (row + dRow * (word.length() - 1) >= size || col + dCol * (word.length() - 1) >= size) continue;
+            if (IntStream.range(0, word.length()).anyMatch(i -> grid[row + i * dRow][col + i * dCol] != ' ')) continue;
+
+            IntStream.range(0, word.length()).forEach(i -> grid[row + i * dRow][col + i * dCol] = word.charAt(i));
+            return true;
         }
+        return false;
     }
+
+    private static void fillEmptyCells() {
+        for (char[] row : grid)
+            Arrays.setAll(row, i -> row[i] == ' ' ? (char) ('А' + random.nextInt(32)) : row[i]);
+    }
+
     private static void printGrid() {
-        for (char[] row : grid) {
-            for (char c : row) {
-                System.out.print(c + " ");
-            }
-            System.out.println();
-        }
+        Arrays.stream(grid).map(String::new).forEach(System.out::println);
     }
 }
+
