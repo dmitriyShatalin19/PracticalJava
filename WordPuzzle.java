@@ -26,7 +26,7 @@ public class WordPuzzle {
             while (!placed) {
                 int row = random.nextInt(size);
                 int col = random.nextInt(size);
-                int direction = random.nextInt(3); // 0 - горизонтально, 1 - вертикально, 2 - диагонально
+                int direction = random.nextInt(3);
                 placed = tryPlaceWord(word, row, col, direction);
             }
         }
@@ -49,7 +49,7 @@ public class WordPuzzle {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (grid[i][j] == ' ') {
-                    grid[i][j] = (char) ('А' + random.nextInt(32)); // Заполнение случайными буквами
+                    grid[i][j] = (char) ('А' + random.nextInt(32));
                 }
             }
         }
