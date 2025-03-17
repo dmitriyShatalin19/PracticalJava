@@ -22,7 +22,7 @@ class Symbol {
     }
 
     public String getIndexString() {
-        return isVisible ? " " : String.valueOf(index);
+        return isVisible && index > 0 ? String.valueOf(index) : " ";
     }
 }
 
@@ -34,27 +34,21 @@ class Word {
         int index = startIndex;
         for (char c : word.toCharArray()) {
             boolean isVisible = !Character.isLetter(c) || random.nextBoolean();
-            symbols.add(new Symbol(c, isVisible ? -1 : index, isVisible));
+            symbols.add(new Symbol(c, Character.isLetter(c) ? index : -1, isVisible));
             if (Character.isLetter(c)) {
                 index++;
             }
         }
     }
 
-    public String getWordString() {
-        StringBuilder sb = new StringBuilder();
+    public String[] getWordWithIndex() {
+        StringBuilder wordLine = new StringBuilder();
+        StringBuilder indexLine = new StringBuilder();
         for (Symbol s : symbols) {
-            sb.append(s).append(" ");
+            wordLine.append(s).append(" ");
+            indexLine.append(s.getIndexString()).append(" ");
         }
-        return sb.toString().trim();
-    }
-
-    public String getIndexString() {
-        StringBuilder sb = new StringBuilder();
-        for (Symbol s : symbols) {
-            sb.append(s.getIndexString()).append(" ");
-        }
-        return sb.toString().trim();
+        return new String[]{wordLine.toString().trim(), indexLine.toString().trim()};
     }
 }
 
@@ -64,12 +58,10 @@ class Generator {
 
     Generator() {
         quotes = Arrays.asList(
-            "Когда ты думаешь, что хуже уже быть не может, это может случиться.",
-            "Если ты не знаешь, куда ты идешь, любые дороги выведут тебя туда, куда тебе нужно.",
-            "Навсегда ничего не бывает.",
-            "Злых людей нет на свете, есть только люди несчастливые.",
-            "У всего есть своя красота, но не каждый может ее увидеть."
-        );
+            "Ты можешь больше.",
+            "Все пройдет.",
+            "Боль неизбежна. Страдание — личный выбор каждого"
+);
         random = new Random();
     }
 
@@ -89,14 +81,30 @@ class Generator {
             }
         }
         
+        int wordsPerLine = 0;
+        StringBuilder wordOutput = new StringBuilder();
+        StringBuilder indexOutput = new StringBuilder();
+        
         for (Word word : wordObjects) {
-            System.out.print(word.getWordString() + " ");
+            String[] wordAndIndex = word.getWordWithIndex();
+            wordOutput.append(wordAndIndex[0]).append("  ");
+            indexOutput.append(wordAndIndex[1]).append("  ");
+            wordsPerLine++;
+            
+            if (wordsPerLine >= 3 + random.nextInt(3)) { // 3-5 слов в строке
+                System.out.println(wordOutput.toString().trim());
+                System.out.println(indexOutput.toString().trim());
+                System.out.println();
+                wordOutput.setLength(0);
+                indexOutput.setLength(0);
+                wordsPerLine = 0;
+            }
         }
-        System.out.println();
-        for (Word word : wordObjects) {
-            System.out.print(word.getIndexString() + " ");
+        
+        if (wordOutput.length() > 0) {
+            System.out.println(wordOutput.toString().trim());
+            System.out.println(indexOutput.toString().trim());
         }
-        System.out.println();
     }
 }
 
