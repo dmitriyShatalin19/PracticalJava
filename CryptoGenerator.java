@@ -22,7 +22,10 @@ class Symbol {
     }
 
     public String getIndexString() {
-        return index > 0 ? String.valueOf(index) : " ";
+        if (index > 0) {
+            return String.format("%-4s", index); // Выравниваем под каждую букву
+        }
+        return "    ";
     }
 }
 
@@ -46,8 +49,8 @@ class Word {
         StringBuilder wordLine = new StringBuilder();
         StringBuilder indexLine = new StringBuilder();
         for (Symbol s : symbols) {
-            wordLine.append(s).append(" ");
-            indexLine.append(s.index > 0 ? s.getIndexString() : " ").append(" ");
+            wordLine.append(String.format("%-4s", s));
+            indexLine.append(s.getIndexString());
         }
         return new String[]{wordLine.toString().trim(), indexLine.toString().trim()};
     }
@@ -110,4 +113,3 @@ class Generator {
         }
     }
 }
-
