@@ -22,7 +22,7 @@ class Symbol {
     }
 
     public String getIndexString() {
-        return isVisible && index > 0 ? String.valueOf(index) : " ";
+        return index > 0 ? String.valueOf(index) : " ";
     }
 }
 
@@ -33,9 +33,10 @@ class Word {
         symbols = new ArrayList<>();
         int index = startIndex;
         for (char c : word.toCharArray()) {
-            boolean isVisible = !Character.isLetter(c) || random.nextBoolean();
-            symbols.add(new Symbol(c, Character.isLetter(c) ? index : -1, isVisible));
-            if (Character.isLetter(c)) {
+            boolean isLetter = Character.isLetter(c);
+            boolean isVisible = !isLetter || random.nextBoolean();
+            symbols.add(new Symbol(c, isLetter ? index : -1, isVisible));
+            if (isLetter) {
                 index++;
             }
         }
@@ -46,7 +47,7 @@ class Word {
         StringBuilder indexLine = new StringBuilder();
         for (Symbol s : symbols) {
             wordLine.append(s).append(" ");
-            indexLine.append(s.getIndexString()).append(" ");
+            indexLine.append(s.index > 0 ? s.getIndexString() : " ").append(" ");
         }
         return new String[]{wordLine.toString().trim(), indexLine.toString().trim()};
     }
@@ -60,8 +61,10 @@ class Generator {
         quotes = Arrays.asList(
             "Ты можешь больше.",
             "Все пройдет.",
-            "Боль неизбежна. Страдание — личный выбор каждого"
-);
+            "Будь собой.",
+            "Жизнь продолжается.",
+            "Мечтай и действуй."
+        );
         random = new Random();
     }
 
@@ -74,8 +77,8 @@ class Generator {
         for (String word : words) {
             Word w = new Word(word, letterIndex, random);
             wordObjects.add(w);
-            for (char c : word.toCharArray()) {
-                if (Character.isLetter(c)) {
+            for (Symbol symbol : w.symbols) {
+                if (Character.isLetter(symbol.character)) {
                     letterIndex++;
                 }
             }
